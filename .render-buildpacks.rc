@@ -1,0 +1,174 @@
+# Render.com Buildpacks Configuration for RotaryClubManager.API
+# This is a simpler alternative to render.yaml for basic deployments
+# Documentation: https://render.com/docs/deploy-an-app
+
+# ===========================================
+# BUILDPACK CONFIGURATION
+# ===========================================
+# Render will automatically detect .NET and use the appropriate buildpack
+# No additional buildpack configuration needed for .NET 8
+
+# ===========================================
+# BUILD CONFIGURATION
+# ===========================================
+# These commands will be executed during the build process
+
+# Build Command (set in Render dashboard):
+# dotnet restore && dotnet build --configuration Release && dotnet publish RotaryClubManager.API/RotaryClubManager.API.csproj --configuration Release --output ./publish
+
+# Start Command (set in Render dashboard):
+# dotnet ./publish/RotaryClubManager.API.dll
+
+# ===========================================
+# ENVIRONMENT VARIABLES TO SET IN RENDER DASHBOARD
+# ===========================================
+# Go to your service Settings > Environment and add these variables:
+
+# ASPNET CORE
+# ASPNETCORE_ENVIRONMENT=Production
+# ASPNETCORE_URLS=http://0.0.0.0:$PORT
+
+# DATABASE (PostgreSQL)
+# ConnectionStrings__DefaultConnection=postgresql://username:password@hostname:port/database
+# (This will be provided by Render when you add a PostgreSQL database)
+
+# JWT SETTINGS
+# JwtSettings__Secret=your-super-secret-jwt-key-minimum-32-characters-long
+# JwtSettings__Issuer=RotaryClubManager
+# JwtSettings__Audience=RotaryClubManagerClient
+# JwtSettings__AccessTokenExpiration=60
+# JwtSettings__RefreshTokenExpiration=1440
+
+# EMAIL CONFIGURATION
+# Email__SmtpHost=smtp.gmail.com
+# Email__SmtpPort=587
+# Email__SmtpUser=your-email@gmail.com
+# Email__SmtpPassword=your-app-password
+# Email__FromEmail=your-email@gmail.com
+# Email__FromName=Rotary Club Manager
+# Email__EnableSsl=true
+# Email__UseSecureConnection=true
+
+# META WHATSAPP API
+# Meta__AppId=your-meta-app-id
+# Meta__PhoneNumberId=your-phone-number-id
+# Meta__WhatsAppBusinessAccountId=your-whatsapp-business-account-id
+# Meta__AccessToken=your-meta-access-token
+# Meta__TestNumber=+1234567890
+# Meta__WebhookVerifyToken=your-webhook-verify-token
+# Meta__ApiVersion=v18.0
+# Meta__WebhookUrl=https://your-app-name.onrender.com/api/metawhatsapp/webhook
+
+# TWILIO (Optional)
+# Twilio__AccountSid=your-twilio-account-sid
+# Twilio__AuthToken=your-twilio-auth-token
+# Twilio__FromPhoneNumber=+1234567890
+
+# APPLICATION SETTINGS
+# DefaultClubId=your-default-club-guid
+# ApiSettings__BaseUrl=https://your-app-name.onrender.com
+
+# CORS
+# CORS__AllowedOrigins__0=https://your-frontend-domain.com
+# CORS__AllowedOrigins__1=http://localhost:3000
+
+# LOGGING
+# Logging__LogLevel__Default=Information
+# Logging__LogLevel__Microsoft.AspNetCore=Warning
+
+# ===========================================
+# QUICK DEPLOYMENT STEPS
+# ===========================================
+# 
+# 1. CREATE NEW WEB SERVICE:
+#    - Go to https://render.com/dashboard
+#    - Click "New" > "Web Service"
+#    - Connect your GitHub repository: https://github.com/DevMick/rotarymanager-main
+# 
+# 2. CONFIGURE SERVICE:
+#    - Name: rotarymanager-api
+#    - Environment: Docker
+#    - Region: Choose closest to your users
+#    - Branch: main
+#    - Root Directory: (leave empty)
+# 
+# 3. BUILD SETTINGS:
+#    - Build Command: 
+#      dotnet restore && dotnet build --configuration Release && dotnet publish RotaryClubManager.API/RotaryClubManager.API.csproj --configuration Release --output ./publish
+#    
+#    - Start Command:
+#      dotnet ./publish/RotaryClubManager.API.dll
+# 
+# 4. ADVANCED SETTINGS:
+#    - Health Check Path: /health
+#    - Auto-Deploy: Yes
+# 
+# 5. ADD POSTGRESQL DATABASE:
+#    - Go to Dashboard > "New" > "PostgreSQL"
+#    - Name: rotarymanager-db
+#    - Plan: Free
+#    - After creation, copy the connection string to your web service environment variables
+# 
+# 6. ENVIRONMENT VARIABLES:
+#    - Go to your web service > Settings > Environment
+#    - Add all the environment variables listed above
+#    - Replace placeholder values with your actual configuration
+# 
+# 7. DEPLOY:
+#    - Click "Create Web Service"
+#    - Wait for build and deployment to complete
+#    - Your API will be available at: https://your-app-name.onrender.com
+# 
+# ===========================================
+# IMPORTANT SECURITY NOTES
+# ===========================================
+# 
+# 🔒 SECRETS MANAGEMENT:
+# - Never commit secrets to your repository
+# - Use Render's environment variables for all sensitive data
+# - Generate strong JWT secrets (minimum 32 characters)
+# - Use app passwords for email (not your main password)
+# 
+# 🌐 CORS CONFIGURATION:
+# - Update CORS__AllowedOrigins with your actual frontend domains
+# - Remove localhost origins in production
+# 
+# 📧 EMAIL SETUP:
+# - For Gmail: Enable 2FA and create an App Password
+# - For other providers: Check their SMTP settings
+# 
+# 📱 WHATSAPP SETUP:
+# - Register for Meta for Developers account
+# - Create a WhatsApp Business App
+# - Get required tokens and IDs from Meta dashboard
+# 
+# ===========================================
+# TROUBLESHOOTING
+# ===========================================
+# 
+# ❌ BUILD FAILS:
+# - Check build logs in Render dashboard
+# - Ensure .NET 8 SDK is available
+# - Verify project file paths are correct
+# 
+# ❌ APP WON'T START:
+# - Check application logs
+# - Verify environment variables are set correctly
+# - Ensure database connection string is valid
+# 
+# ❌ DATABASE CONNECTION ISSUES:
+# - Verify PostgreSQL service is running
+# - Check connection string format
+# - Ensure database migrations are applied
+# 
+# ❌ HEALTH CHECK FAILS:
+# - Verify /health endpoint exists in your API
+# - Check if endpoint returns 200 OK status
+# - Review application startup logs
+# 
+# 📞 SUPPORT:
+# - Render Documentation: https://render.com/docs
+# - Render Community: https://community.render.com
+# - GitHub Issues: https://github.com/DevMick/rotarymanager-main/issues
+# 
+# ===========================================

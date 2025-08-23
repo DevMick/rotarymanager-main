@@ -133,6 +133,31 @@ Copiez le fichier `appsettings.example.json` vers `appsettings.json` et configur
 
 ⚠️ **Important** : Ne jamais commiter le fichier `appsettings.json` avec de vraies valeurs de production.
 
+## 🚀 Déploiement
+
+### Render.com (Recommandé)
+Déploiement gratuit avec PostgreSQL inclus :
+
+```bash
+# Option 1 : Blueprint (automatique)
+# Le fichier render.yaml configure tout automatiquement
+git push origin main  # Render détecte et déploie automatiquement
+
+# Option 2 : Manuel
+# Suivez les instructions dans DEPLOYMENT.md
+```
+
+**Liens utiles :**
+- 📖 [Guide de déploiement complet](DEPLOYMENT.md)
+- 🔧 [Configuration Render](render.yaml)
+- 🏥 [Health checks](https://your-app.onrender.com/health)
+
+### Autres plateformes
+- **Azure App Service** : Compatible avec les conteneurs .NET
+- **AWS Elastic Beanstalk** : Support natif .NET
+- **Google Cloud Run** : Déploiement via conteneurs
+- **Heroku** : Avec buildpack .NET
+
 ## 🧪 Tests
 
 ```bash
