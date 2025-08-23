@@ -1,0 +1,6 @@
+@RotaryClubManager.API_HostAddress = http://localhost:5265
+
+GET {{RotaryClubManager.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
