@@ -1,0 +1,37 @@
+services:
+  rotarymanager-api:
+    build:
+      context: .
+      dockerfile: deployment/docker/Dockerfile.api
+    container_name: rotarymanager-api
+    ports:
+      - "8033:8033"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8033
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8033/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15
+    container_name: rotarymanager-db
+    environment:
+      POSTGRES_DB: rotarymanager
+      POSTGRES_USER: rotarymanager
+      POSTGRES_PASSWORD: rotarymanager123
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped

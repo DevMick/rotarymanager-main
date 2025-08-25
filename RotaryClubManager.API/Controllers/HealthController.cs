@@ -4,10 +4,6 @@ using RotaryClubManager.Infrastructure.Data;
 
 namespace RotaryClubManager.API.Controllers
 {
-    /// <summary>
-    /// Health check controller for monitoring application status
-    /// Required for Render.com deployment health checks
-    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class HealthController : ControllerBase
@@ -21,11 +17,6 @@ namespace RotaryClubManager.API.Controllers
             _logger = logger;
         }
 
-        /// <summary>
-        /// Basic health check endpoint
-        /// Returns 200 OK if the application is running
-        /// </summary>
-        /// <returns>Health status</returns>
         [HttpGet]
         public IActionResult Get()
         {
@@ -35,7 +26,7 @@ namespace RotaryClubManager.API.Controllers
                 {
                     status = "healthy",
                     timestamp = DateTime.UtcNow,
-                    version = "1.0.0",
+                    version = "2.0.0",
                     environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Unknown"
                 };
 
@@ -49,10 +40,6 @@ namespace RotaryClubManager.API.Controllers
             }
         }
 
-        /// <summary>
-        /// Detailed health check with database connectivity
-        /// </summary>
-        /// <returns>Detailed health status</returns>
         [HttpGet("detailed")]
         public async Task<IActionResult> GetDetailed()
         {
@@ -60,7 +47,6 @@ namespace RotaryClubManager.API.Controllers
 
             try
             {
-                // Check application status
                 healthChecks["application"] = new
                 {
                     status = "healthy",
@@ -68,7 +54,6 @@ namespace RotaryClubManager.API.Controllers
                     timestamp = DateTime.UtcNow
                 };
 
-                // Check database connectivity
                 try
                 {
                     var canConnect = await _context.Database.CanConnectAsync();
@@ -88,28 +73,6 @@ namespace RotaryClubManager.API.Controllers
                         timestamp = DateTime.UtcNow
                     };
                 }
-
-                // Check environment variables
-                var requiredEnvVars = new[]
-                {
-                    "ASPNETCORE_ENVIRONMENT",
-                    "ConnectionStrings__DefaultConnection",
-                    "JwtSettings__Secret"
-                };
-
-                var envVarStatus = new Dictionary<string, bool>();
-                foreach (var envVar in requiredEnvVars)
-                {
-                    var value = Environment.GetEnvironmentVariable(envVar.Replace("__", ":"));
-                    envVarStatus[envVar] = !string.IsNullOrEmpty(value);
-                }
-
-                healthChecks["environment"] = new
-                {
-                    status = envVarStatus.All(x => x.Value) ? "healthy" : "warning",
-                    variables = envVarStatus,
-                    timestamp = DateTime.UtcNow
-                };
 
                 var overallStatus = healthChecks.Values
                     .OfType<dynamic>()
@@ -136,28 +99,16 @@ namespace RotaryClubManager.API.Controllers
             }
         }
 
-        /// <summary>
-        /// Readiness probe - checks if the application is ready to serve requests
-        /// </summary>
-        /// <returns>Readiness status</returns>
         [HttpGet("ready")]
         public async Task<IActionResult> Ready()
         {
             try
             {
-                // Check if database is accessible
                 var canConnect = await _context.Database.CanConnectAsync();
                 
                 if (!canConnect)
                 {
                     return StatusCode(503, new { status = "not ready", reason = "database not accessible" });
-                }
-
-                // Check if required configuration is present
-                var jwtSecret = Environment.GetEnvironmentVariable("JwtSettings:Secret");
-                if (string.IsNullOrEmpty(jwtSecret))
-                {
-                    return StatusCode(503, new { status = "not ready", reason = "jwt configuration missing" });
                 }
 
                 return Ok(new { status = "ready", timestamp = DateTime.UtcNow });
@@ -169,10 +120,6 @@ namespace RotaryClubManager.API.Controllers
             }
         }
 
-        /// <summary>
-        /// Liveness probe - checks if the application is alive
-        /// </summary>
-        /// <returns>Liveness status</returns>
         [HttpGet("live")]
         public IActionResult Live()
         {
