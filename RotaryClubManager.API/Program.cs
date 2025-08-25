@@ -408,42 +408,8 @@ if (app.Environment.IsProduction())
 app.MapControllers();
 
 // ============================================================================
-// ENDPOINTS DE SANTE ET TEST
+// ENDPOINTS DE TEST SEULEMENT (Health via HealthController)
 // ============================================================================
-
-app.MapGet("/health", (IServiceProvider services) =>
-{
-    try
-    {
-        var dbContext = services.GetRequiredService<ApplicationDbContext>();
-        var canConnect = dbContext.Database.CanConnect();
-
-        return Results.Ok(new
-        {
-            Status = "Healthy",
-            Timestamp = DateTime.UtcNow,
-            Version = "2.0.0",
-            Services = new
-            {
-                Database = canConnect ? "Connected" : "Disconnected",
-                Email = "Configured",
-                Calendar = "Configured",
-                WhatsApp = "Meta Business API",
-                Authentication = "Active",
-                RateLimit = "Active"
-            }
-        });
-    }
-    catch (Exception ex)
-    {
-        return Results.Json(new
-        {
-            Status = "Unhealthy",
-            Timestamp = DateTime.UtcNow,
-            Error = ex.Message
-        }, statusCode: 503);
-    }
-}).WithTags("Health").AllowAnonymous();
 
 // Endpoint de test immédiat
 app.MapGet("/api/test", () =>

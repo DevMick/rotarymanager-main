@@ -5,18 +5,21 @@ using RotaryClubManager.Infrastructure.Data;
 namespace RotaryClubManager.API.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]  // Route API standard
     public class HealthController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<HealthController> _logger;
 
-        public HealthController(ApplicationDbContext context, ILogger<HealthController> logger)
+        public HealthController(ApplicationDbContext context, ILogger<HealthController> logger)  // Typo corrigée
         {
             _context = context;
             _logger = logger;
         }
 
+        /// <summary>
+        /// Endpoint principal de santé - GET /api/health
+        /// </summary>
         [HttpGet]
         public IActionResult Get()
         {
@@ -40,6 +43,9 @@ namespace RotaryClubManager.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Endpoint détaillé de santé - GET /api/health/detailed
+        /// </summary>
         [HttpGet("detailed")]
         public async Task<IActionResult> GetDetailed()
         {
@@ -99,6 +105,9 @@ namespace RotaryClubManager.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Endpoint de readiness - GET /api/health/ready
+        /// </summary>
         [HttpGet("ready")]
         public async Task<IActionResult> Ready()
         {
@@ -120,6 +129,9 @@ namespace RotaryClubManager.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Endpoint de liveness - GET /api/health/live
+        /// </summary>
         [HttpGet("live")]
         public IActionResult Live()
         {
