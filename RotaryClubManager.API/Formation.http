@@ -1,0 +1,190 @@
+### Variables d'environnement
+@baseUrl = https://api.rotaryclub.test
+@authToken = {{login.response.body.token}}
+@clubId = 12345678-1234-1234-1234-123456789012
+@documentId = 87654321-4321-4321-4321-210987654321
+@sessionId = 11111111-1111-1111-1111-111111111111
+
+### Login pour obtenir le token
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "admin@rotaryclub.test",
+    "password": "Password123!"
+}
+
+###
+
+### 1. Upload d'un document de formation
+POST {{baseUrl}}/api/formation/clubs/{{clubId}}/documents
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="manuel-rotary.pdf"
+Content-Type: application/pdf
+
+< ./manuel-rotary.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="titre
+
+Manuel Rotary 2024
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="description
+
+Guide complet des procédures Rotary International
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="type
+
+1
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###
+
+### 2. Récupérer tous les documents d'un club
+GET {{baseUrl}}/api/formation/clubs/{{clubId}}/documents
+Authorization: Bearer {{authToken}}
+
+###
+
+### 3. Récupérer un document spécifique
+GET {{baseUrl}}/api/formation/clubs/{{clubId}}/documents/{{documentId}}
+Authorization: Bearer {{authToken}}
+
+###
+
+### 4. Modifier un document
+PUT {{baseUrl}}/api/formation/clubs/{{clubId}}/documents/{{documentId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "titre": "Manuel Rotary 2024 - Mise à jour",
+    "description": "Guide complet des procédures Rotary International - Version révisée",
+    "estActif": true,
+    "type": 1
+}
+
+###
+
+### 5. Démarrer une session de formation
+POST {{baseUrl}}/api/formation/sessions
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "documentFormationId": "{{documentId}}",
+    "scoreObjectif": 80
+}
+
+###
+
+### 6. Récupérer une session de formation
+GET {{baseUrl}}/api/formation/sessions/{{sessionId}}
+Authorization: Bearer {{authToken}}
+
+###
+
+### 7. Récupérer toutes les sessions de l'utilisateur
+GET {{baseUrl}}/api/formation/sessions
+Authorization: Bearer {{authToken}}
+
+###
+
+### 8. Récupérer les sessions d'un club (Admin/President)
+GET {{baseUrl}}/api/formation/clubs/{{clubId}}/sessions
+Authorization: Bearer {{authToken}}
+
+###
+
+### 9. Récupérer les questions d'une session
+GET {{baseUrl}}/api/formation/sessions/{{sessionId}}/questions
+Authorization: Bearer {{authToken}}
+
+###
+
+### 10. Soumettre une réponse à une question
+POST {{baseUrl}}/api/formation/sessions/{{sessionId}}/responses
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "questionFormationId": "22222222-2222-2222-2222-222222222222",
+    "reponseUtilisateur": "A",
+    "tempsReponseMs": 5000
+}
+
+###
+
+### 11. Récupérer les badges de l'utilisateur
+GET {{baseUrl}}/api/formation/badges
+Authorization: Bearer {{authToken}}
+
+###
+
+### 12. Récupérer la progression de l'utilisateur
+GET {{baseUrl}}/api/formation/progression
+Authorization: Bearer {{authToken}}
+
+###
+
+### 13. Récupérer la progression d'un club (Admin/President)
+GET {{baseUrl}}/api/formation/clubs/{{clubId}}/progression
+Authorization: Bearer {{authToken}}
+
+###
+
+### 14. Recherche sémantique dans les documents
+GET {{baseUrl}}/api/formation/clubs/{{clubId}}/search?query=procédures%20réunion
+Authorization: Bearer {{authToken}}
+
+###
+
+### 15. Supprimer un document (Admin/President)
+DELETE {{baseUrl}}/api/formation/clubs/{{clubId}}/documents/{{documentId}}
+Authorization: Bearer {{authToken}}
+
+###
+
+### Tests d'erreur
+
+### Test avec token invalide
+GET {{baseUrl}}/api/formation/clubs/{{clubId}}/documents
+Authorization: Bearer invalid_token
+
+###
+
+### Test sans autorisation
+GET {{baseUrl}}/api/formation/clubs/{{clubId}}/documents
+
+###
+
+### Test avec club inexistant
+GET {{baseUrl}}/api/formation/clubs/00000000-0000-0000-0000-000000000000/documents
+Authorization: Bearer {{authToken}}
+
+###
+
+### Test upload fichier non PDF
+POST {{baseUrl}}/api/formation/clubs/{{clubId}}/documents
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="test.txt"
+Content-Type: text/plain
+
+Ceci est un fichier texte, pas un PDF
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="titre
+
+Test fichier texte
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="type
+
+1
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###

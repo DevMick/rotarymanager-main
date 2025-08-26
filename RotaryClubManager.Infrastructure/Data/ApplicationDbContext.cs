@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RotaryClubManager.Domain.Entities;
+using RotaryClubManager.Domain.Entities.Formation;
 using RotaryClubManager.Domain.Identity;
 using static RotaryClubManager.Domain.Entities.InviteReunion;
 
@@ -57,6 +58,14 @@ namespace RotaryClubManager.Infrastructure.Data
         public DbSet<ListePresence> ListesPresence { get; set; }
         public DbSet<InviteReunion> InvitesReunion { get; set; }
         public DbSet<ReunionDocument> ReunionDocuments { get; set; }
+
+        // ===== ENTITÉS POUR LE MODULE DE FORMATION =====
+        public DbSet<DocumentFormation> DocumentsFormation { get; set; }
+        public DbSet<ChunkDocument> ChunksDocument { get; set; }
+        public DbSet<SessionFormation> SessionsFormation { get; set; }
+        public DbSet<QuestionFormation> QuestionsFormation { get; set; }
+        public DbSet<ReponseUtilisateur> ReponsesUtilisateur { get; set; }
+        public DbSet<BadgeFormation> BadgesFormation { get; set; }
         // Ajoutez cette méthode TEMPORAIREMENT dans ApplicationDbContext
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -1374,6 +1383,157 @@ namespace RotaryClubManager.Infrastructure.Data
 
                 // Index pour optimiser les recherches par email
                 entity.HasIndex(e => e.Email);
+            });
+
+            // ===== CONFIGURATIONS POUR LE MODULE DE FORMATION =====
+
+            // Configuration de DocumentFormation
+            modelBuilder.Entity<DocumentFormation>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Titre).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Description).HasMaxLength(1000);
+                entity.Property(e => e.CheminFichier).IsRequired().HasMaxLength(500);
+                entity.Property(e => e.UploadePar).IsRequired().HasMaxLength(450);
+                entity.Property(e => e.ClubId).IsRequired();
+                entity.Property(e => e.Type).IsRequired();
+
+                // Relations
+                entity.HasOne(e => e.Uploadeur)
+                      .WithMany()
+                      .HasForeignKey(e => e.UploadePar)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Club)
+                      .WithMany()
+                      .HasForeignKey(e => e.ClubId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // Index
+                entity.HasIndex(e => e.ClubId);
+                entity.HasIndex(e => e.UploadePar);
+                entity.HasIndex(e => e.DateUpload);
+                entity.HasIndex(e => new { e.ClubId, e.EstActif });
+            });
+
+            // Configuration de ChunkDocument
+            modelBuilder.Entity<ChunkDocument>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.DocumentFormationId).IsRequired();
+                entity.Property(e => e.Contenu).IsRequired();
+                entity.Property(e => e.IndexChunk).IsRequired();
+                
+                // Configuration de la propriété Embedding pour pgvector
+                // Temporairement ignorée pour la migration, sera configurée manuellement
+                entity.Ignore(e => e.Embedding);
+
+                // Relation avec DocumentFormation
+                entity.HasOne(e => e.DocumentFormation)
+                      .WithMany(e => e.Chunks)
+                      .HasForeignKey(e => e.DocumentFormationId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // Index
+                entity.HasIndex(e => e.DocumentFormationId);
+                entity.HasIndex(e => e.IndexChunk);
+                entity.HasIndex(e => new { e.DocumentFormationId, e.IndexChunk });
+            });
+
+            // Configuration de SessionFormation
+            modelBuilder.Entity<SessionFormation>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.MembreId).IsRequired().HasMaxLength(450);
+                entity.Property(e => e.DocumentFormationId).IsRequired();
+                entity.Property(e => e.ScoreActuel).HasDefaultValue(0);
+                entity.Property(e => e.ScoreObjectif).HasDefaultValue(80);
+                entity.Property(e => e.Statut).HasDefaultValue(StatutSession.EnCours);
+
+                // Relations
+                entity.HasOne(e => e.Membre)
+                      .WithMany()
+                      .HasForeignKey(e => e.MembreId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.DocumentFormation)
+                      .WithMany(e => e.Sessions)
+                      .HasForeignKey(e => e.DocumentFormationId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // Index
+                entity.HasIndex(e => e.MembreId);
+                entity.HasIndex(e => e.DocumentFormationId);
+                entity.HasIndex(e => e.DateDebut);
+                entity.HasIndex(e => new { e.MembreId, e.DocumentFormationId });
+            });
+
+            // Configuration de QuestionFormation
+            modelBuilder.Entity<QuestionFormation>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.SessionFormationId).IsRequired();
+                entity.Property(e => e.ChunkDocumentId).IsRequired();
+                entity.Property(e => e.TexteQuestion).IsRequired().HasMaxLength(1000);
+                entity.Property(e => e.ReponseCorrecte).IsRequired().HasMaxLength(500);
+                entity.Property(e => e.Difficulte).HasDefaultValue(1);
+
+                // Relations
+                entity.HasOne(e => e.SessionFormation)
+                      .WithMany(e => e.Questions)
+                      .HasForeignKey(e => e.SessionFormationId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.ChunkDocument)
+                      .WithMany(e => e.Questions)
+                      .HasForeignKey(e => e.ChunkDocumentId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // Index
+                entity.HasIndex(e => e.SessionFormationId);
+                entity.HasIndex(e => e.ChunkDocumentId);
+                entity.HasIndex(e => e.Difficulte);
+            });
+
+            // Configuration de ReponseUtilisateur
+            modelBuilder.Entity<ReponseUtilisateur>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.QuestionFormationId).IsRequired();
+                entity.Property(e => e.ReponseTexte).IsRequired().HasMaxLength(1000);
+                entity.Property(e => e.TempsReponseMs).IsRequired();
+
+                // Relation avec QuestionFormation
+                entity.HasOne(e => e.QuestionFormation)
+                      .WithMany(e => e.Reponses)
+                      .HasForeignKey(e => e.QuestionFormationId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // Index
+                entity.HasIndex(e => e.QuestionFormationId);
+                entity.HasIndex(e => e.DateReponse);
+            });
+
+            // Configuration de BadgeFormation
+            modelBuilder.Entity<BadgeFormation>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.MembreId).IsRequired().HasMaxLength(450);
+                entity.Property(e => e.Type).IsRequired();
+                entity.Property(e => e.DocumentFormationId).HasMaxLength(450);
+                entity.Property(e => e.PointsGagnes).HasDefaultValue(0);
+
+                // Relation avec ApplicationUser
+                entity.HasOne(e => e.Membre)
+                      .WithMany()
+                      .HasForeignKey(e => e.MembreId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // Index
+                entity.HasIndex(e => e.MembreId);
+                entity.HasIndex(e => e.Type);
+                entity.HasIndex(e => e.DateObtention);
+                entity.HasIndex(e => new { e.MembreId, e.Type, e.DocumentFormationId });
             });
         }
     }

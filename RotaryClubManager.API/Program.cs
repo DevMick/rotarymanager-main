@@ -8,10 +8,12 @@ using Microsoft.OpenApi.Models;
 using RotaryClubManager.API.Middleware;
 using RotaryClubManager.Application.Services;
 using RotaryClubManager.Application.Services.Authentication;
+using RotaryClubManager.Application.Services.Formation;
 using RotaryClubManager.Application.Validators.Authentication;
 using RotaryClubManager.Domain.Entities;
 using RotaryClubManager.Domain.Identity;
 using RotaryClubManager.Infrastructure.Data;
+using RotaryClubManager.Infrastructure.Data.Repositories.Formation;
 using RotaryClubManager.Infrastructure.Services;
 using RotaryClubManager.Infrastructure.Services.Authentication;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -28,7 +30,8 @@ var builder = WebApplication.CreateBuilder(args);
 // HttpClient pour Meta WhatsApp API
 builder.Services.AddHttpClient<MetaWhatsAppService>();
 builder.Services.AddScoped<MetaWhatsAppService>();
-
+// Enregistrer le service de formation
+builder.Services.AddScoped<IFormationService, FormationService>();
 // ============================================================================
 // CONFIGURATION DE LA BASE DE DONNEES
 // ============================================================================
@@ -59,6 +62,10 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
+builder.Services.AddScoped<IFormationRepository, FormationRepository>();
+builder.Services.AddScoped<IEmbeddingService, EmbeddingService>();
+builder.Services.AddScoped<IAIService, AIService>();
+builder.Services.AddScoped<IQuestionGeneratorService, QuestionGeneratorService>();
 // ============================================================================
 // CONFIGURATION DU SERVICE EMAIL
 // ============================================================================

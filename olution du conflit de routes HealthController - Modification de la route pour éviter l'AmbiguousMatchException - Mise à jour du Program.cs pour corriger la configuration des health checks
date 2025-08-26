@@ -1,0 +1,3 @@
+[33m5f79a75[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Fix: Correction du HealthController et configuration Docker - Correction de l'AmbiguousMatchException dans HealthController - Ajout du service PostgreSQL dans docker-compose.yml - Création du Dockerfile.api pour le déploiement - Configuration de la base de données locale au lieu d'Aiven Cloud - Correction des routes de santé (/health, /health/detailed, /health/ready, /health/live)
+[33mf955041[m Add Render.com deployment configuration
+[33ma4e7177[m Initial commit: Rotary Club Manager API
